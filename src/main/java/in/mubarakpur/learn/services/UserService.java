@@ -51,7 +51,7 @@ public class UserService {
   }
 
   public User updateUser(User user) throws ResponseStatusException {
-    User fetchedUser = this.getUsers().stream().filter((usr) -> user.getId() == user.getId()).findAny().get();
+    User fetchedUser = this.getUsers().stream().filter((usr) -> user.getId() == usr.getId()).findAny().orElse(null);
     if (fetchedUser == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     fetchedUser.setUsername(user.getUsername());
     fetchedUser.setPassword(user.getPassword());
