@@ -2,22 +2,29 @@ package in.mubarakpur.learn.model;
 
 import java.util.Date;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+
+@Entity
+@Table(
+  name = "users",
+  uniqueConstraints = @UniqueConstraint(columnNames = "username")
+)
 public class User {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
   int id;
-  String username;
-  String password;
-  Date createdAt;
-
-  public User() {
-  }
-
-  public User(final int id, final String username, final String password, Date createdAt) {
-    this.id = id;
-    this.username = username;
-    this.password = password;
-    this.createdAt = createdAt;
-  }
+  private String username;
+  private String password;
+  @CreationTimestamp
+  private Date createdAt;
 
   public int getId() {
     return id;
