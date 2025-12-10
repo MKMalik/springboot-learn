@@ -3,6 +3,7 @@ package in.mubarakpur.learn.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import in.mubarakpur.learn.DTO.UserCreateDTO;
+import in.mubarakpur.learn.DTO.UserDTO;
+import in.mubarakpur.learn.mapper.UserMapper;
 import in.mubarakpur.learn.model.User;
 import in.mubarakpur.learn.services.UserService;
-import jakarta.websocket.server.PathParam;
 
 @RestController
 class UserController {
@@ -22,24 +25,23 @@ class UserController {
   private UserService userService;
 
   @GetMapping("/users")
-  List<User> listUsers() {
+  List<UserDTO> listUsers() {
     return userService.getUsers();
   }
 
   @GetMapping("/user")
-  User getUser(
+  UserDTO getUser(
       @RequestParam int id) {
     return userService.getUser(id);
   }
 
   @PostMapping("user")
-  User addUser(@RequestBody User user) {
-    userService.addUser(user);
-    return user;
+  UserDTO addUser(@Validated @RequestBody UserCreateDTO user) {
+    return UserMapper.toDTO(userService.addUser(user));
   }
 
   @PutMapping("/user/{id}")
-  User updateUser(@RequestBody User user, @PathVariable Long id) {
+  UserDTO updateUser(@RequestBody User user, @PathVariable Long id) {
     return this.userService.updateUser(id, user);
   }
 

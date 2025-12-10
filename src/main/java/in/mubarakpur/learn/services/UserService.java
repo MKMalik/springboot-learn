@@ -4,9 +4,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import in.mubarakpur.learn.DTO.UserCreateDTO;
+import in.mubarakpur.learn.DTO.UserDTO;
+import in.mubarakpur.learn.mapper.UserCreateMapper;
+import in.mubarakpur.learn.mapper.UserMapper;
 import in.mubarakpur.learn.model.User;
 import in.mubarakpur.learn.repository.UserRepository;
 
@@ -15,17 +20,21 @@ public class UserService {
 
   @Autowired
   private UserRepository userRepository;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
-  public User getUser(long id) {
-    return userRepository.findById(id)
+  public UserDTO getUser(long id) {
+    return userRepository.findById(id).map(UserMapper::toDTO)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
   }
 
-  public User addUser(User user) {
+  public User addUser(UserCreateDTO user) {
     if (userRepository.existsByUsername(user.getUsername())) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "username taken");
     }
-    return userRepository.save(user);
+    User userEntity = UserCreateMapper.toEntity(user);
+    userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
+    return userRepository.save(userEntity);
   }
 
   public void removeUser(long id) {
@@ -35,16 +44,20 @@ public class UserService {
     userRepository.deleteById(id);
   }
 
-  public User updateUser(long id, User updatedUser) {
-    return userRepository.findById(id)
-        .map(user -> {
-          user.setUsername(updatedUser.getUsername());
-          user.setPassword(updatedUser.getPassword());
-          return userRepository.save(user);
+  public UserDTO updateUser(long id, User updatedUser) {
+    User user = userRepository.findById(id)
+        .map(u -> {
+          u.setUsername(updatedUser.getUsername());
+          u.setPassword(updatedUser.getPassword());
+          return userRepository.save(u);
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    return UserMapper.toDTO(user);
   }
 
-  public List<User> getUsers() {
-    return userRepository.findAll();
+  public List<UserDTO> getUsers() {
+    return userRepository.findAll()
+        .stream()
+        .map(UserMapper::toDTO)
+        .toList();
   }
 }
